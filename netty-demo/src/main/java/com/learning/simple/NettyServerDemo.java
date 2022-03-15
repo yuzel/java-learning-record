@@ -20,6 +20,8 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 import java.nio.charset.Charset;
 
@@ -32,7 +34,7 @@ import java.nio.charset.Charset;
 public class NettyServerDemo {
 
     public static void main(String[] args) throws InterruptedException {
-        int port = Integer.parseInt(args[1]);
+        int port = Integer.parseInt(args[0]);
         EventLoopGroup boosGroup = new NioEventLoopGroup();
         EventLoopGroup workGroup = new NioEventLoopGroup();
         ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -40,6 +42,7 @@ public class NettyServerDemo {
                 .group(boosGroup, workGroup)
                 .channel(NioServerSocketChannel.class)
                 .localAddress(port)
+                .handler(new LoggingHandler(LogLevel.INFO))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -58,7 +61,7 @@ public class NettyServerDemo {
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
         try {
             ChannelFuture channelFuture = serverBootstrap.bind().sync();
-            System.out.println("Http Server started, Listening on 8080");
+            System.out.println("Http Server started, Listening on " + port);
             channelFuture.channel().closeFuture().sync();
         } finally {
             workGroup.shutdownGracefully();
