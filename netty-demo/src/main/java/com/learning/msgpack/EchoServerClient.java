@@ -18,13 +18,10 @@ public class EchoServerClient {
     
     private final int port;
     
-    private final int sendNumber;
     
-    
-    public EchoServerClient(String host, int port, int sendNumber) {
+    public EchoServerClient(String host, int port) {
         this.host = host;
         this.port = port;
-        this.sendNumber = sendNumber;
     }
     
     public void run() throws Exception {
@@ -34,12 +31,12 @@ public class EchoServerClient {
         bootstrap.group(boss, work)
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
-                .handler(new ChannelInitializer<ServerSocketChannel>() {
+                .childHandler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
-                    protected void initChannel(ServerSocketChannel socketChannel) throws Exception {
+                    protected void initChannel(NioSocketChannel socketChannel) throws Exception {
                         socketChannel.pipeline().addLast("msgpack decoder", new MsgpackDecoder());
                         socketChannel.pipeline().addLast("msgpack encoder", new MsgpackEncoder());
-                        socketChannel.pipeline().addLast(new EchoClientHandler(sendNumber));
+                        socketChannel.pipeline().addLast(new EchoServerHandler());
                     }
                 });
         try{
@@ -53,6 +50,6 @@ public class EchoServerClient {
     }
     
     public static void main(String[] args) throws Exception {
-        new EchoClient("127.0.0.1", 8080, 3).run();
+        new EchoServerClient("127.0.0.1", 8080).run();
     }
 }

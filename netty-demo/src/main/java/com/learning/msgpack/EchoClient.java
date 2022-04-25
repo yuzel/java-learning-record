@@ -36,9 +36,9 @@ public class EchoClient {
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3000)
-                .handler(new ChannelInitializer<SocketChannel>() {
+                .handler(new ChannelInitializer<NioSocketChannel>() {
                     @Override
-                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                    protected void initChannel(NioSocketChannel socketChannel) throws Exception {
                         socketChannel.pipeline().addLast("msgpack decoder", new MsgpackDecoder());
                         socketChannel.pipeline().addLast("msgpack encoder", new MsgpackEncoder());
                         socketChannel.pipeline().addLast(new EchoClientHandler(sendNumber));
